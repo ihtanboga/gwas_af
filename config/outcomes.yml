@@ -1,0 +1,105 @@
+# Logical outcome panel definition. Each logical outcome maps to one or more
+# concrete dataset_ids in datasets.yml (primary plus optional sensitivity sets).
+# This indirection lets the pipeline swap concrete files (e.g. AF 2025 vs AF
+# 2018 EUR fallback) without rewriting downstream rules.
+
+panels:
+  primary:
+    - AF
+    - HF_overall
+    - HF_nonischemic
+    - HF_ni_HFrEF
+    - ischemic_stroke
+    - cardioembolic_stroke
+    - large_artery_stroke
+    - small_vessel_stroke
+
+  # D001 REVISED — HFpEF eligible for plots/tables but cannot drive class.
+  exploratory:
+    - HF_ni_HFpEF
+
+  safety:
+    - hemorrhagic_stroke
+    - intracranial_hemorrhage
+    - VTE
+    - CAD
+    - MI
+    - cardiomyopathy
+    - bradyarrhythmia
+    - PR_interval
+    - QT_interval
+    - QRS_duration
+    - systolic_BP
+    - diastolic_BP
+    - CKD
+    - liver_disease
+    - bleeding
+
+  mechanistic_covariates:
+    - LDL_C
+    - HDL_C
+    - triglycerides
+    - apoB
+    - Lp_a
+    - BMI
+    - WHR
+    - SBP
+    - DBP
+    - CRP
+    - NT_proBNP
+    - troponin
+
+mappings:
+  AF:
+    primary: AF_primary
+    sensitivity: [AF_eur_2018_fallback]
+    replication: [AF_finngen_replication]
+
+  HF_overall:
+    primary: HF_overall_hermes2024
+    sensitivity: [HF_overall_hermes2020_fallback]
+    replication: []
+
+  HF_nonischemic:
+    primary: HF_nonischemic_hermes2024
+    sensitivity: []
+    replication: []
+
+  HF_ni_HFrEF:
+    primary: HF_ni_HFrEF_hermes2024
+    sensitivity: []
+    replication: []
+
+  HF_ni_HFpEF:
+    primary: HF_ni_HFpEF_hermes2024
+    sensitivity: []
+    replication: []
+
+  # D029 — primary stroke source = GIGASTROKE 2022 EUR.
+  # MEGASTROKE 2018 = manual sensitivity only (megastroke.org checkbox).
+  ischemic_stroke:
+    primary: Stroke_ischemic_gigastroke_eur
+    sensitivity: [Stroke_megastroke_2018_eur_manual_sensitivity]
+    replication: []
+
+  cardioembolic_stroke:
+    primary: Stroke_cardioembolic_gigastroke_eur
+    sensitivity: []
+    replication: []
+
+  large_artery_stroke:
+    primary: Stroke_largeartery_gigastroke_eur
+    sensitivity: []
+    replication: []
+
+  small_vessel_stroke:
+    primary: Stroke_smallvessel_gigastroke_eur
+    sensitivity: []
+    replication: []
+
+# Off-axis and AF-mediated effect estimation requires AF -> outcome path.
+af_to_outcome_paths:
+  - cardioembolic_stroke
+  - ischemic_stroke
+  - HF_overall
+  - HF_nonischemic

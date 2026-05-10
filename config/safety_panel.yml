@@ -1,0 +1,111 @@
+# Secondary safety / mechanistic outcome panel. Free of UKB-PPP discovery
+# concerns is preferred. Each entry maps to a dataset_id (resolved later) or
+# is left as TODO until the corresponding GWAS is registered.
+
+safety_outcomes:
+  hemorrhagic_stroke:
+    severity_weight: 1.7
+    note: "Critical safety signal for any antithrombotic-adjacent target."
+    dataset_id: TODO
+
+  intracranial_hemorrhage:
+    severity_weight: 1.6
+    note: "Captures bleeding risk distinct from ischemic stroke."
+    dataset_id: TODO
+
+  VTE:
+    severity_weight: 1.2
+    note: "Coagulation cascade red-flag indicator."
+    dataset_id: TODO
+
+  CAD:
+    severity_weight: 1.3
+    note: "Cardiovascular comorbidity; reuses Aragam2022 if available locally from sister project."
+    dataset_id: TODO
+
+  MI:
+    severity_weight: 1.3
+    note: "Acute coronary event."
+    dataset_id: TODO
+
+  cardiomyopathy:
+    severity_weight: 1.4
+    note: "Sarcomere / contractility safety signal."
+    dataset_id: TODO
+
+  bradyarrhythmia:
+    severity_weight: 1.3
+    note: "Conduction safety. Critical for ion-channel AF targets."
+    dataset_id: TODO
+
+  PR_interval:
+    severity_weight: 1.0
+    note: "ECG quantitative trait."
+    dataset_id: TODO
+
+  QT_interval:
+    severity_weight: 1.2
+    note: "ECG quantitative trait; QT prolongation = pro-arrhythmic."
+    dataset_id: TODO
+
+  QRS_duration:
+    severity_weight: 1.0
+    note: "ECG quantitative trait."
+    dataset_id: TODO
+
+  systolic_BP:
+    severity_weight: 1.0
+    note: "Blood pressure mechanistic covariate."
+    dataset_id: TODO
+
+  diastolic_BP:
+    severity_weight: 1.0
+    note: "Blood pressure mechanistic covariate."
+    dataset_id: TODO
+
+  CKD:
+    severity_weight: 1.1
+    note: "Renal safety."
+    dataset_id: TODO
+
+  liver_disease:
+    severity_weight: 1.0
+    note: "Hepatic safety."
+    dataset_id: TODO
+
+  bleeding:
+    severity_weight: 1.4
+    note: "Composite bleeding phenotype if available; otherwif then approximate via ICH+VTE+GI bleeding."
+    dataset_id: TODO
+
+mechanistic_covariates:
+  LDL_C:
+    severity_weight: 0.0  # not penalised — used for mechanistic interpretation
+    dataset_id: TODO
+  HDL_C:
+    severity_weight: 0.0
+    dataset_id: TODO
+  triglycerides:
+    severity_weight: 0.0
+    dataset_id: TODO
+  apoB:
+    severity_weight: 0.0
+    dataset_id: TODO
+  Lp_a:
+    severity_weight: 0.0
+    dataset_id: TODO
+  BMI:
+    severity_weight: 0.0
+    dataset_id: TODO
+  WHR:
+    severity_weight: 0.0
+    dataset_id: TODO
+  CRP:
+    severity_weight: 0.0
+    dataset_id: TODO
+  NT_proBNP:
+    severity_weight: 0.0
+    dataset_id: TODO
+  troponin:
+    severity_weight: 0.0
+    dataset_id: TODO

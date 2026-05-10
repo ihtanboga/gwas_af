@@ -1,0 +1,39 @@
+batch_name: CVD-prioritized 500 aptamer staged batch (D034)
+scope_label: CVD-prioritized plasma proteomic target screen
+n_aptamers: 454
+n_unique_genes: 408
+max_aptamers_per_gene_default: 3
+multi_aptamer_exceptions:
+- F2
+- F9
+- NPPB
+- PROC
+categories:
+  cat1_af_hf_stroke_gwas_loci: 19
+  cat2_coagulation: 45
+  cat3_inflammation: 148
+  cat4_lipid: 31
+  cat5_cardiac_stress: 28
+  cat6_ecm_fibrosis: 67
+  cat7_endothelial_vascular: 67
+  cat8_druggable_cvd: 26
+  cat9_smoke_sanity: 23
+calibration_priors:
+  median_gb_per_aptamer: 0.953
+  median_minutes_per_aptamer: 3.73
+  cv_prior_empty_rate: 0.13
+  cv_prior_match_to_AF_rate: 0.85
+expected_metrics_4_workers:
+  transfer_gb: 432.7
+  wall_hours: 11.29
+  empty_rate: 0.13
+  match_rate: 0.85
+list_qc_thresholds:
+  n_aptamers_min: 450
+  n_aptamers_max: 550
+  transfer_gb_max: 600
+  runtime_4w_hours_max: 16
+  empty_rate_max: 0.25
+  match_rate_min: 0.75
+  top_gene_share_max: 0.05
+approval_gate: explicit_protocol_approval_required_before_extraction

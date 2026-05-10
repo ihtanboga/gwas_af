@@ -1,0 +1,51 @@
+# Positive-control loci for AFSHF-TARGETMAP smoke tests.
+#
+# Source: well-established lead loci from the published AF / HF / stroke GWAS
+# literature. Used as a sanity gate during harmonization and downstream QC:
+#   - At least one variant per locus must survive harmonize() in cis window.
+#   - In Phase 3 these genes should produce concordant MR signals on the
+#     trait they were selected for (sign and rough magnitude as published).
+#
+# Coordinates are GRCh38 gene-body boundaries (Ensembl/HGNC); the cis window
+# (config/analysis_thresholds.yml::cis_window_kb) is added at filter time.
+# Approximate lead variant rsid is provided for fast manual lookup; the
+# pipeline does NOT rely on that single SNP being present, only on the
+# cis window containing at least one significant variant.
+#
+# Columns:
+#   gene_symbol, chr, gene_start, gene_end, build, trait, role,
+#   expected_direction, lead_variant_rsid_approx, reference
+#
+# expected_direction is the direction of the LEAD risk allele on the named
+# trait (matches sign in the cited GWAS); '?' = direction not constrained.
+
+gene_symbol	chr	gene_start	gene_end	build	trait	role	expected_direction	lead_variant_rsid_approx	reference
+PITX2	4	111538579	111563419	GRCh38	AF	positive_control	+	rs2200733	Roselli2018, Christophersen2017
+ZFHX3	16	72816785	73093597	GRCh38	AF	positive_control	+	rs2106261	Roselli2018
+KCNN3	1	154698692	154857088	GRCh38	AF	positive_control	+	rs13376333	Roselli2018
+PRRX1	1	170662808	170739063	GRCh38	AF	positive_control	+	rs3903239	Roselli2018
+CAV1	7	116524785	116561185	GRCh38	AF	positive_control	+	rs3807989	Roselli2018
+TBX5	12	114291708	114407083	GRCh38	AF	positive_control	+	rs7312625	Roselli2018, ChristophersenAF
+PITX2	4	111538579	111563419	GRCh38	cardioembolic_stroke	positive_control	+	rs2200733	MEGASTROKE2018
+ZFHX3	16	72816785	73093597	GRCh38	cardioembolic_stroke	positive_control	+	rs2106261	MEGASTROKE2018
+HDAC9	7	18086949	18769582	GRCh38	large_artery_stroke	positive_control	+	rs2107595	MEGASTROKE2018
+PHACTR1	6	12715732	13297989	GRCh38	large_artery_stroke	positive_control	?	rs9349379	MEGASTROKE2018, AragamCAD2022
+ABO	9	133250400	133275282	GRCh38	cardioembolic_stroke	positive_control	?	rs8176685	MEGASTROKE2018, KlarinVTE2019
+BAG3	10	119651379	119677819	GRCh38	HF_overall	positive_control	-	rs2234962	HERMES2020, HERMES2024
+TTN	2	178525989	178830814	GRCh38	HF_overall	positive_control	?	rs10497520	HERMES2024, ShahHF2020
+NPPA	1	11845709	11848345	GRCh38	HF_overall	positive_control	?	rs5068	HERMES2024
+NPPB	1	11849854	11853614	GRCh38	HF_overall	positive_control	?	rs5068	HERMES2024
+FLNC	7	128830500	128859292	GRCh38	HF_overall	positive_control	?	rs10242456	HERMES2024
+TBX5	12	114291708	114407083	GRCh38	HF_overall	positive_control	?	rs7312625	HERMES2024
+NKX2-5	5	173232106	173235312	GRCh38	AF	positive_control	?	rs6882776	Roselli2018
+GJA5	1	147762547	147787123	GRCh38	AF	positive_control	?	rs10465885	Roselli2018
+KCNN2	5	114117024	114281315	GRCh38	AF	positive_control	?	rs337711	Roselli2018
+MYH6	14	23381333	23408471	GRCh38	AF	positive_control	?	rs365990	Roselli2018
+MYH7	14	23412918	23435679	GRCh38	HF_overall	positive_control	?	rs422068	HERMES2024, ShahHF2020
+LMNA	1	156082572	156140089	GRCh38	HF_overall	positive_control	?	rs915179	OMIM_DCM
+PLN	6	118541684	118562894	GRCh38	HF_overall	positive_control	?	rs9482550	HERMES2024
+TNNT2	1	201328142	201346805	GRCh38	HF_overall	positive_control	?	rs3729712	OMIM_DCM
+FOXF2	6	1390067	1395393	GRCh38	small_vessel_stroke	positive_control	?	rs12203592	MEGASTROKE2018
+ZCCHC14	16	87397569	87487442	GRCh38	large_artery_stroke	positive_control	?	rs7193343	GIGASTROKE2022
+COL4A1	13	110148949	110307272	GRCh38	small_vessel_stroke	positive_control	?	rs9521634	MEGASTROKE2018
+COL4A2	13	110307247	110482140	GRCh38	small_vessel_stroke	positive_control	?	rs7989897	MEGASTROKE2018

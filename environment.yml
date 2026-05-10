@@ -1,0 +1,39 @@
+name: afshf
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python=3.11
+  - pip
+  - numpy
+  - pandas
+  - polars
+  - pyarrow
+  - scipy
+  - statsmodels
+  - networkx
+  - pyyaml
+  - requests
+  - tqdm
+  - boto3
+  - matplotlib
+  - seaborn
+  - jupyterlab
+  - pysam
+  - tabix
+  - bcftools
+  - htslib
+  - plink
+  - liftover
+  - pyliftover
+  - synapseclient
+  - gql
+  - aiohttp
+  - pip:
+      - rich
+      - typer
+      - pydantic>=2
+      - python-dotenv
+      - pytest
+      - chembl-webresource-client
+      - opentargets

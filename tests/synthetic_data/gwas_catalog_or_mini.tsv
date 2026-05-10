@@ -1,0 +1,5 @@
+variant_id	hm_rsid	hm_chrom	hm_pos	hm_effect_allele	hm_other_allele	hm_odds_ratio	standard_error	p_value	effect_allele_frequency	sample_size
+4_111720761_T_C	rs2200733	4	111720761	T	C	1.154	0.012	1.5e-30	0.12	450000
+16_72847393_A_G	rs2106261	16	72847393	A	G	1.129	0.014	2.1e-18	0.18	450000
+1_154744725_G_C	rs13376333	1	154744725	G	C	1.091	0.011	3.4e-15	0.08	450000
+22_30000000_C_T	rs99999992	22	30000000	C	T	1.000	0.020	0.50	0.10	450000

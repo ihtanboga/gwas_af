@@ -1,0 +1,33 @@
+Package: afshf-targetmap
+Title: AF-Stroke-HF Therapeutic Pleiotropy Atlas
+Version: 0.1.0
+Description:
+    Reproducible R-side dependencies for the AFSHF-TARGETMAP project.
+    R is used for harmonization, MR (TwoSampleMR / MendelianRandomization /
+    MVMR), colocalization (coloc, susieR), genetic correlation (LDSC bridge,
+    HDL), multi-trait sharing (HyPrColoc) and Quarto reporting.
+Imports:
+    yaml,
+    data.table,
+    arrow,
+    dplyr,
+    tidyr,
+    readr,
+    purrr,
+    optparse,
+    TwoSampleMR,
+    ieugwasr,
+    MendelianRandomization,
+    MRPRESSO,
+    MVMR,
+    coloc,
+    susieR,
+    hyprcoloc,
+    GenomicRanges,
+    rtracklayer,
+    biomaRt,
+    httr,
+    jsonlite,
+    rmarkdown,
+    quarto
+Encoding: UTF-8

@@ -1,0 +1,173 @@
+# Statistical thresholds and decision rules. Mirrors spec sections 6 and 10.
+
+harmonization:
+  drop_if_missing_beta_or_se: true
+  drop_if_invalid_alleles: true
+  drop_info_below: 0.8        # only enforced when INFO column is present
+  drop_maf_below: 0.01         # primary common-variant analysis
+  keep_low_freq_separately: true
+  palindromic:
+    drop_if_eaf_missing: true
+    drop_if_eaf_within_of_half: 0.05  # |EAF - 0.5| < 0.05 -> ambiguous, drop
+  preferred_build: GRCh38
+  liftover_chain_b37_to_b38: data/raw/annotations/hg19ToHg38.over.chain.gz
+
+instruments:
+  cis_window_kb: 1000
+  p_primary: 5.0e-8
+  p_exploratory: 5.0e-6
+  clump_r2: 0.001
+  clump_kb: 10000
+  min_f_stat: 10
+  prefer_cis: true
+  trans_for_primary: false
+  trans_min_replications: 2
+
+mr:
+  primary_method_single_snp: wald_ratio
+  primary_method_multi_snp: ivw_random
+  sensitivity_methods:
+    - weighted_median
+    - weighted_mode
+    - mr_egger
+    - leave_one_out
+    - heterogeneity_q
+    - steiger
+  steiger_policy: flag_only
+  fdr_method: BH
+  fdr_primary: 0.05
+  fdr_exploratory: 0.10
+
+coloc:
+  method_primary: coloc_abf
+  method_secondary: coloc_susie
+  region_kb: 500
+  region_kb_extended: 1000
+  prior_p1: 1.0e-4
+  prior_p2: 1.0e-4
+  prior_p12_primary: 5.0e-6
+  prior_p12_sensitivity: [1.0e-6, 5.0e-6, 1.0e-5, 1.0e-4]
+  pph4_strong: 0.80
+  pph4_very_strong: 0.90
+  pph4_moderate: 0.50
+  pph3_warn: 0.50
+  flag_ld_confounding_when: "PPH3 > 0.50 and PPH4 < 0.50"
+
+intervention_direction:
+  rule: "d_T = -sign(beta_target_to_AF)"
+  af_min_p_for_direction: 0.05
+  require_coloc_for_direction: false   # direction set even when coloc is weak; flagged
+  af_signal_must_be_cis: true
+  # D005 REVISED — AF action-direction tier system (protocol approval).
+  # Primary GREEN/RED classes accept only `strong` or `moderate`.
+  tiers:
+    strong:
+      fdr_AF_below: 0.05
+      pph4_AF_above: 0.80
+    moderate:
+      p_AF_below: 0.05
+      pph4_AF_above: 0.50
+    weak:
+      p_AF_below: 0.05
+      pph4_AF_below: 0.50
+    none:
+      description: "p_AF >= 0.05 OR beta missing -> d_T = 0"
+  primary_class_eligible_tiers: [strong, moderate]
+
+# D025 — pre-flight retention gate before MR/coloc launch.
+positive_control_gate:
+  enforce: true
+  required_min_loci_retained: 1   # per primary outcome
+  block_phase: 3                  # block phase3_mr if retention fails
+
+classification:
+  # Primary HF outcomes that may trigger RED/GREEN (HFpEF NOT included — D001 REVISED).
+  hf_primary_outcomes: [HF_overall, HF_nonischemic, HF_ni_HFrEF]
+  hf_exploratory_outcomes: [HF_ni_HFpEF]
+  stroke_primary_outcomes: [ischemic_stroke, cardioembolic_stroke,
+                            large_artery_stroke, small_vessel_stroke]
+
+  # GREEN/RED triggers require AF tier in primary_class_eligible_tiers AND
+  # the harm/benefit signal lives in a *primary* (not exploratory) outcome.
+  green1_af_benefit_neutral_safety:
+    require:
+      - af_tier in [strong, moderate]
+      - theta_AF < 0
+      - all(primary_other_outcomes: not_significant_or_neutral)
+  green2_shared_benefit:
+    require:
+      - af_tier in [strong, moderate]
+      - theta_AF < 0
+      - any(primary_other_outcomes: theta < 0 and fdr < 0.05 and pph4 >= 0.80)
+  amber1_af_benefit_unresolved:
+    require:
+      - af_tier in [strong, moderate]
+      - theta_AF < 0
+      - any(primary_other_outcomes: significant_but_pph4_below_0.50)
+  red1_af_benefit_hf_harm:
+    require:
+      - af_tier in [strong, moderate]
+      - theta_AF < 0
+      - any(hf_primary_outcomes: theta > 0 and fdr < 0.05 and pph4 >= 0.50)
+  red2_af_benefit_stroke_harm:
+    require:
+      - af_tier in [strong, moderate]
+      - theta_AF < 0
+      - any(stroke_primary_outcomes: theta > 0 and fdr < 0.05 and pph4 >= 0.50)
+  red3_af_benefit_multi_harm:
+    require:
+      - red1_triggered and red2_triggered
+  blue_non_af_shared:
+    require:
+      - af_tier not in [strong, moderate]
+      - any(primary_other_outcomes: theta < 0 and fdr < 0.05 and pph4 >= 0.50)
+  purple_hfstroke_benefit_af_harm:
+    require:
+      - theta_AF > 0
+      - significant_at(af_effect, fdr<0.05, pph4>=0.50)
+      - any(primary_other_outcomes: theta < 0 and fdr < 0.05)
+
+  # Exploratory annotations attached to every target row, irrespective of class.
+  exploratory_concerns:
+    hfpef_signal:
+      condition: "HF_ni_HFpEF significant_at(p<0.05, pph4>=0.50)"
+      flag: hfpef_exploratory_concern
+    weak_af_direction:
+      condition: "af_tier == weak"
+      flag: weak_af_direction_only
+
+# D009 REVISED — Tier 0 / Tier 1 publishable target rules.
+target_tiers:
+  tier_1_publishable:
+    require:
+      - af_tier in [strong, moderate]
+      - coloc_AF_pph4 >= 0.50
+      - intervention_direction in [-1, +1]
+      - hf_stroke_effects_computed: true
+      - one_of:
+          - decode_or_scallop_pqtl_replication_concordant
+          - finngen_outcome_replication_concordant
+          - independent_eqtl_tissue_with_coloc
+  tier_0_top_priority:
+    require_in_addition_to_tier_1:
+      - independent_pqtl_replication_concordant
+      - independent_outcome_replication_concordant
+
+# D014 REVISED — off-axis decomposition mandatory exploratory output.
+off_axis:
+  compute: mandatory                        # always populate columns
+  use_in_target_class: false                # never gates classification
+  flag_threshold_log_or: 0.05               # |excess_offaxis| > 0.05 -> dominant flag
+  applies_to:
+    - cardioembolic_stroke
+    - ischemic_stroke
+    - HF_overall
+    - HF_nonischemic
+
+scoring:
+  # D008 REVISED — severity_weights ranking-only.
+  harm_penalty_lambda: 1.5
+  max_logp_component: 10
+  severity_weights_in_classification: false   # MUST stay false — see D008
+  severity_weights_in_balance_score: true
+  use_severity_weights: true

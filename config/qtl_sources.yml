@@ -1,0 +1,104 @@
+# cis-pQTL and cis-eQTL exposure registry.
+#
+# Primary causal target evidence comes from cis instruments only.
+# Trans-pQTL/eQTL signal is captured separately for network annotation.
+
+qtl_sources:
+
+  # ---------------- pQTL ----------------
+  # D031 — primary discovery is now deCODE 2021 (Ferkingstad). UKB-PPP
+  # transitions to validation once DAR is approved.
+  decode_2021:
+    type: pQTL
+    assay: SomaScan_v4
+    role: discovery                       # D031
+    citation: Ferkingstad et al., Nat Genet 53(12):1712-1721, 2021 (PMID 34857953)
+    n_proteins: 4907                      # plasma protein measurements (SomaScan v4)
+    n_samples_eur: 35559                  # Icelandic cohort
+    ancestry: EUR
+    genome_build: GRCh38
+    cis_window_kb: 1000
+    p_primary: 5.0e-8
+    p_exploratory: 5.0e-6
+    download_url_env: AFSHF_URL_DECODE
+    local_path: data/raw/qtl/decode_2021/
+    license: deCODE-terms; non-commercial scientific use; cite Ferkingstad 2021
+    sample_overlap_warning: "Independent of UKB / FinnGen / MVP. Primary advantage over UKB-PPP for our outcomes (no overlap with HERMES / GIGASTROKE / AF Roselli)."
+
+  ukbppp:
+    type: pQTL
+    assay: Olink_Explore_3072
+    role: validation                      # D031: was discovery; awaiting DAR
+    citation: Sun et al., Nature 622:329-338, 2023 (PMID 37794186)
+    n_proteins: 2923
+    n_samples_eur: 54219
+    ancestry: EUR
+    genome_build: GRCh38
+    cis_window_kb: 1000
+    p_primary: 5.0e-8
+    p_exploratory: 5.0e-6
+    download_url_env: AFSHF_URL_UKBPPP
+    local_path: data/raw/qtl/ukbppp/
+    license: CC-BY (Sun 2023); Synapse syn51364943 controlled access via DAR
+    access_status: ACCESS_REQUIRED         # D030/D031
+    sample_overlap_warning: "Major UKB overlap risk with HERMES 2024, AF 2018/2025, GIGASTROKE EUR; sensitivity required when outcome contains UKB."
+
+  scallop:
+    type: pQTL
+    assay: Olink_Inflammation_Cardio
+    role: replication
+    n_proteins: ~90
+    n_samples_eur: ~30000
+    ancestry: EUR
+    genome_build: GRCh37
+    cis_window_kb: 1000
+    p_primary: 5.0e-8
+    p_exploratory: 5.0e-6
+    download_url_env: AFSHF_URL_SCALLOP
+    local_path: data/raw/qtl/scallop/
+    license: SCALLOP-terms
+    sample_overlap_warning: "Cohort-level overlap minor; verify on a per-protein basis."
+
+  # ---------------- eQTL ----------------
+  eqtlgen:
+    type: eQTL
+    assay: blood_microarray_RNAseq_meta
+    role: secondary
+    tissue: whole_blood
+    n_samples: 31684
+    ancestry: EUR
+    genome_build: GRCh37
+    cis_window_kb: 1000
+    p_primary: 5.0e-8
+    p_exploratory: 5.0e-6
+    download_url_env: AFSHF_URL_EQTLGEN
+    local_path: data/raw/qtl/eqtlgen/
+    license: eQTLGen-terms
+    sample_overlap_warning: "Use carefully if outcome cohort contributes; meta-analysis includes many studies."
+
+  gtex_v8:
+    type: eQTL
+    assay: bulk_RNAseq
+    role: secondary
+    tissues:
+      - Heart_Atrial_Appendage
+      - Heart_Left_Ventricle
+      - Artery_Aorta
+      - Artery_Coronary
+      - Artery_Tibial
+      - Liver
+      - Whole_Blood
+      - Adipose_Visceral_Omentum
+      - Adipose_Subcutaneous
+      - Muscle_Skeletal
+      - Kidney_Cortex
+    n_samples: ~838
+    ancestry: MIXED
+    genome_build: GRCh38
+    cis_window_kb: 1000
+    p_primary: 5.0e-8
+    p_exploratory: 5.0e-6
+    download_url_env: AFSHF_URL_GTEX_V8
+    local_path: data/raw/qtl/gtex_v8/
+    license: GTEx-terms
+    sample_overlap_warning: "Tissue-specific. Heart_Atrial_Appendage is the AF-relevant tissue."

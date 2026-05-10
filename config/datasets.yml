@@ -1,0 +1,233 @@
+# Outcome GWAS dataset registry.
+#
+# Schema for every entry:
+#   trait: short trait label
+#   trait_group: AF | HF | STROKE | SAFETY
+#   source: provider key
+#   dataset_label: human-readable label used in plots/reports
+#   ancestry: EUR | MIXED | EAS | AFR | AMR
+#   genome_build: GRCh37 | GRCh38
+#   n_cases / n_controls (optional)
+#   sample_overlap_notes: free text — flag UKB / FinnGen / 23andMe overlap
+#   download_url_env: env present holding the download URL (NEVER inline credentials)
+#   local_path: relative to data/raw/outcomes
+#   license: e.g. CC0, CC-BY, custom
+#   primary_or_replication: primary | replication | sensitivity
+#
+# All paths are placeholders until Phase 0 download/harmonization is run.
+
+outcomes:
+
+  # ---------------- Atrial fibrillation ----------------
+  AF_primary:
+    trait: atrial_fibrillation
+    trait_group: AF
+    source: CVDKP
+    dataset_label: AF_2025_common_variants_Roselli
+    ancestry: MIXED
+    genome_build: GRCh38
+    n_cases: null
+    n_controls: null
+    sample_overlap_notes: "Roselli 2025 includes UKB; treat as UKB-overlapping until cohort is verified."
+    sample_overlap_flag: possible_UKB_overlap
+    download_url_env: AFSHF_URL_AF_2025
+    local_path: data/raw/outcomes/af/af_2025_common.tsv.gz
+    license: CVDKP-terms
+    primary_or_replication: primary
+
+  AF_eur_2018_fallback:
+    trait: atrial_fibrillation
+    trait_group: AF
+    source: CVDKP
+    dataset_label: AF_HRC_2018_EUR
+    ancestry: EUR
+    genome_build: GRCh37
+    n_cases: 55114
+    n_controls: 482295
+    sample_overlap_notes: "Roselli 2018 supplementary materials confirm UK Biobank inclusion. NOT UKB-free; sensitivity / older-AF concordance only (D020)."
+    sample_overlap_flag: possible_UKB_overlap
+    download_url_env: AFSHF_URL_AF_2018_EUR
+    local_path: data/raw/outcomes/af/af_2018_eur.tsv.gz
+    license: CVDKP-terms
+    primary_or_replication: sensitivity
+
+  AF_finngen_replication:
+    trait: atrial_fibrillation
+    trait_group: AF
+    source: FinnGen
+    dataset_label: FinnGen_R12_I9_AF
+    ancestry: EUR
+    genome_build: GRCh38
+    n_cases: null
+    n_controls: null
+    sample_overlap_notes: "FinnGen R12 — UKB-free cohort (verified)."
+    sample_overlap_flag: verified_UKB_free
+    download_url_env: AFSHF_URL_FINNGEN_AF
+    local_path: data/raw/outcomes/af/finngen_r12_af.tsv.gz
+    license: FinnGen-terms
+    primary_or_replication: replication
+
+  # ---------------- Heart failure ----------------
+  HF_overall_hermes2024:
+    trait: heart_failure_overall
+    trait_group: HF
+    source: CVDKP
+    dataset_label: HERMES_2024_HF_overall_trans_ancestry
+    ancestry: MIXED
+    genome_build: GRCh38
+    n_cases: 153174
+    n_controls: 1815632
+    sample_overlap_notes: "HERMES 2024 includes UKB. Independent support layer required for any UKB-PPP-derived target."
+    sample_overlap_flag: verified_includes_UKB
+    download_url_env: AFSHF_URL_HERMES_HF_OVERALL
+    local_path: data/raw/outcomes/hf/hermes_2024_overall.tsv.gz
+    license: CVDKP-terms
+    primary_or_replication: primary
+
+  HF_nonischemic_hermes2024:
+    trait: heart_failure_nonischemic
+    trait_group: HF
+    source: CVDKP
+    dataset_label: HERMES_2024_nonischemic_HF
+    ancestry: MIXED
+    genome_build: GRCh38
+    n_cases: null
+    n_controls: null
+    sample_overlap_notes: "HERMES 2024 subtype — UKB included. Independent support layer required."
+    sample_overlap_flag: verified_includes_UKB
+    download_url_env: AFSHF_URL_HERMES_HF_NONISCHEMIC
+    local_path: data/raw/outcomes/hf/hermes_2024_nonischemic.tsv.gz
+    license: CVDKP-terms
+    primary_or_replication: primary
+
+  HF_ni_HFrEF_hermes2024:
+    trait: heart_failure_ni_HFrEF
+    trait_group: HF
+    source: CVDKP
+    dataset_label: HERMES_2024_ni_HFrEF
+    ancestry: MIXED
+    genome_build: GRCh38
+    n_cases: null
+    n_controls: null
+    sample_overlap_notes: "HERMES 2024 HFrEF — UKB included."
+    sample_overlap_flag: verified_includes_UKB
+    download_url_env: AFSHF_URL_HERMES_HFrEF
+    local_path: data/raw/outcomes/hf/hermes_2024_ni_hfref.tsv.gz
+    license: CVDKP-terms
+    primary_or_replication: primary
+
+  HF_ni_HFpEF_hermes2024:
+    trait: heart_failure_ni_HFpEF
+    trait_group: HF
+    source: CVDKP
+    dataset_label: HERMES_2024_ni_HFpEF
+    ancestry: MIXED
+    genome_build: GRCh38
+    n_cases: null
+    n_controls: null
+    sample_overlap_notes: "HERMES 2024 HFpEF — UKB included. Exploratory only (D001 REVISED)."
+    sample_overlap_flag: verified_includes_UKB
+    download_url_env: AFSHF_URL_HERMES_HFpEF
+    local_path: data/raw/outcomes/hf/hermes_2024_ni_hfpef.tsv.gz
+    license: CVDKP-terms
+    primary_or_replication: primary
+
+  HF_overall_hermes2020_fallback:
+    trait: heart_failure_overall
+    trait_group: HF
+    source: CVDKP
+    dataset_label: HERMES_2020_HF_overall
+    ancestry: EUR
+    genome_build: GRCh37
+    n_cases: 47309
+    n_controls: 930014
+    sample_overlap_notes: "HERMES 2020 includes UKB. Fallback when 2024 unavailable."
+    sample_overlap_flag: verified_includes_UKB
+    download_url_env: AFSHF_URL_HERMES_2020
+    local_path: data/raw/outcomes/hf/hermes_2020_overall.tsv.gz
+    license: CVDKP-terms
+    primary_or_replication: sensitivity
+
+  # ---------------- Stroke ----------------
+  # D029 — primary stroke source = GIGASTROKE 2022 EUR (Mishra et al., Nat Genet 2022,
+  # PMID 36180795). Harmonised summary statistics from GWAS Catalog (build GRCh38).
+  Stroke_ischemic_gigastroke_eur:
+    trait: ischemic_stroke
+    trait_group: STROKE
+    source: GIGASTROKE_GWAS_Catalog
+    dataset_label: GIGASTROKE_2022_AIS_EUR
+    ancestry: EUR
+    genome_build: GRCh38
+    n_cases: 62100
+    n_controls: 1234808
+    sample_overlap_notes: "GIGASTROKE 2022 EUR meta-analysis includes UKB+FinnGen+MVP among many cohorts; sample overlap risk with UKB-PPP discovery is non-trivial."
+    sample_overlap_flag: possible_UKB_overlap
+    download_url_env: AFSHF_URL_GIGASTROKE_AIS_EUR
+    local_path: data/raw/outcomes/stroke_eur/gigastroke/GCST90104540.h.tsv.gz
+    license: GWAS-Catalog terms; ISGC + Mishra 2022 citation; non-commercial scientific use
+    primary_or_replication: primary
+
+  Stroke_cardioembolic_gigastroke_eur:
+    trait: cardioembolic_stroke
+    trait_group: STROKE
+    source: GIGASTROKE_GWAS_Catalog
+    dataset_label: GIGASTROKE_2022_CES_EUR
+    ancestry: EUR
+    genome_build: GRCh38
+    n_cases: 10804
+    n_controls: 1234808
+    sample_overlap_notes: "GIGASTROKE EUR cardioembolic; UKB+FinnGen+MVP overlap risk."
+    sample_overlap_flag: possible_UKB_overlap
+    download_url_env: AFSHF_URL_GIGASTROKE_CES_EUR
+    local_path: data/raw/outcomes/stroke_eur/gigastroke/GCST90104541.h.tsv.gz
+    license: GWAS-Catalog terms; ISGC + Mishra 2022 citation
+    primary_or_replication: primary
+
+  Stroke_largeartery_gigastroke_eur:
+    trait: large_artery_stroke
+    trait_group: STROKE
+    source: GIGASTROKE_GWAS_Catalog
+    dataset_label: GIGASTROKE_2022_LAS_EUR
+    ancestry: EUR
+    genome_build: GRCh38
+    n_cases: 6399
+    n_controls: 1234808
+    sample_overlap_notes: "GIGASTROKE EUR LAS; UKB+FinnGen+MVP overlap risk."
+    sample_overlap_flag: possible_UKB_overlap
+    download_url_env: AFSHF_URL_GIGASTROKE_LAS_EUR
+    local_path: data/raw/outcomes/stroke_eur/gigastroke/GCST90104542.h.tsv.gz
+    license: GWAS-Catalog terms; ISGC + Mishra 2022 citation
+    primary_or_replication: primary
+
+  Stroke_smallvessel_gigastroke_eur:
+    trait: small_vessel_stroke
+    trait_group: STROKE
+    source: GIGASTROKE_GWAS_Catalog
+    dataset_label: GIGASTROKE_2022_SVS_EUR
+    ancestry: EUR
+    genome_build: GRCh38
+    n_cases: 6811
+    n_controls: 1234808
+    sample_overlap_notes: "GIGASTROKE EUR SVS; UKB+FinnGen+MVP overlap risk."
+    sample_overlap_flag: possible_UKB_overlap
+    download_url_env: AFSHF_URL_GIGASTROKE_SVS_EUR
+    local_path: data/raw/outcomes/stroke_eur/gigastroke/GCST90104543.h.tsv.gz
+    license: GWAS-Catalog terms; ISGC + Mishra 2022 citation
+    primary_or_replication: primary
+
+  # MEGASTROKE 2018 manual sensitivity (megastroke.org checkbox download); D029 ek.
+  Stroke_megastroke_2018_eur_manual_sensitivity:
+    trait: ischemic_stroke
+    trait_group: STROKE
+    source: MEGASTROKE_official
+    dataset_label: MEGASTROKE_2018_EUR_manual
+    ancestry: EUR
+    genome_build: GRCh37
+    n_cases: null
+    n_controls: null
+    sample_overlap_notes: "Malik 2018 MEGASTROKE; manual download from megastroke.org required (terms checkbox). Pipeline does not auto-fetch."
+    sample_overlap_flag: possible_internal_ISGC_overlap
+    download_url_env: null
+    local_path: data/raw/outcomes/stroke_eur/megastroke_2018_manual/
+    license: ISGC scientific/educational only; Malik 2018 (PMID 29531354) citation; commercial use prohibited
+    primary_or_replication: sensitivity

@@ -1,0 +1,330 @@
+# column_maps.yml — Source-specific header alias maps.
+#
+# Each source key (CVDKP_AF, FinnGen, GWAS_Catalog, UKBPPP, deCODE, GTEx, eQTLGen)
+# resolves raw GWAS/QTL column names to the project's standard schema. The
+# pipeline applies the map *before* harmonization. See:
+#   - src/afshf/column_maps.py (apply_column_map)
+#   - src/afshf/harmonize.py (downstream QC)
+#
+# Field semantics
+# ---------------
+# column_aliases.<standard_field>:
+#   list of accepted source-side header names (case-sensitive matching is
+#   tried first, then case-insensitive). The first alias that resolves wins.
+#
+# derive:
+#   beta_from_or       : if true and `or` is present but `beta` is missing,
+#                        compute beta = log(or); SE is left untouched (assumed
+#                        on log-OR scale unless `se_scale: or`).
+#   beta_from_z        : if true and `beta` is missing but `z` is present,
+#                        compute beta and (if needed) SE from Z, EAF, and N
+#                        using the eQTLGen approximation.
+#   se_from_or         : rare — if SE provided on the OR scale, divide by OR.
+#
+# se_scale: log_or | or
+# effect_scale: log_or | beta
+# build: GRCh37 | GRCh38
+# ancestry: EUR | MIXED | EAS | AFR | AMR
+#
+# default_metadata: applied when an attribute is not provided in the dataset
+# entry of datasets.yml / qtl_sources.yml.
+
+defaults:
+  effect_scale: log_or
+  se_scale: log_or
+  build: GRCh38
+  ancestry: EUR
+  case_sensitive_first: true
+  strict_unknown_columns: false
+
+sources:
+
+  # ----------------------------- CVDKP -------------------------------------
+  CVDKP_AF:
+    description: "CVDKP atrial-fibrillation common-variant releases (Christophersen 2017, Roselli 2018, Roselli 2025/AFGen+)."
+    column_aliases:
+      variant_id: [MarkerName, SNP, snptestID, ID, variant, variant_id]
+      rsid: [rsid, rsID, RSID, SNP, ID]
+      chr: [chr, CHR, chromosome, chrom, "#CHR", "#CHROM"]
+      # Roselli 2025 ships GRCh38 positions in `position_b38`; older releases
+      # used BP/POS in GRCh37. The pipeline still standardises to `pos` and
+      # carries the build flag from datasets.yml.
+      pos: [position_b38, BP, POS, position, base_pair_location, bp, pos]
+      effect_allele: [Allele1, A1, EA, effect_allele, ALT]
+      other_allele: [Allele2, A2, NEA, other_allele, REF]
+      beta: [Effect, BETA, beta, b, log_or]
+      or: [OR, OddsRatio, odds_ratio]
+      se: [StdErr, SE, standard_error, se_log_or, se]
+      pval: [P-value, P, P_value, pval, pvalue, p]
+      # Roselli 2025 reports "log(P)" instead of P. Base + sign are
+      # determined empirically (see derive_pval_from_log_p below).
+      log_p: ["log(P)", logP, log_p, "-log10(P)", "-logP", neglog10p]
+      eaf: [Freq1, EAF, AF, AF1, frequency, effect_allele_frequency]
+      n: [n_total, N, N_total, n_samples, sample_size]
+      n_cases: [n_events, N_case, N_cases, ncase, n_cases]
+      n_controls: [N_control, N_controls, ncontrol, n_controls]
+      info: [mean_impQual, INFO, info_score, imputation_quality, MinFreq]
+    derive:
+      beta_from_or: true
+      beta_from_z: false
+      se_from_or: false
+      # Roselli 2025: pval = 10**log_p when log_p is signed (negative for sig).
+      # If log_p is unsigned (positive), pval = 10**(-log_p). Auto-detected.
+      pval_from_log_p: true
+      log_p_base: 10                  # default 10; override to "e" for natural log
+      log_p_sign: auto                # auto | signed | unsigned
+    metadata:
+      effect_scale: log_or
+      se_scale: log_or
+      build: GRCh37                   # default older releases; AF_primary overrides to GRCh38
+      ancestry: MIXED
+
+  CVDKP_HERMES:
+    description: "HERMES 2.0 heart-failure 2024 EUR release (FORMAT-METAL_{phenotype}_EUR.tsv.gz). Build = GRCh37/hg19. logP is unsigned -log10(P). 4 phenotypes: Pheno1=HF overall, Pheno2=non-ischemic HF, Pheno3=ni-HFrEF, Pheno4=ni-HFpEF (exploratory)."
+    column_aliases:
+      variant_id: ["#key", MarkerName, SNP, ID, variant_id]
+      rsid: [rsID, rsid, RSID, SNP, ID]
+      chr: [chr, CHR, chromosome, "#CHR"]
+      pos: [pos_b37, BP, POS, base_pair_location, position, pos]
+      effect_allele: [A1, Allele1, EA, effect_allele, ALT]
+      other_allele: [A2, Allele2, NEA, other_allele, REF]
+      beta: [A1_beta, Effect, BETA, beta, log_or, b]
+      or: [OR, odds_ratio]
+      se: [se, StdErr, SE, standard_error]
+      pval: [pval, P-value, P, p_value, pvalue, p]
+      log10p: [logP, "-log10p", "-log10P", neg_log10p, log10p_unsigned]
+      eaf: [A1_freq, Freq1, EAF, AF, frequency]
+      n: [N_total, N, sample_size, n_samples]
+      n_cases: [N_case, N_cases, ncase, n_case]
+      n_controls: [N_control, N_controls, ncontrol]
+      info: [INFO, imputation_quality]
+      # heterogeneity columns (carried for QC, not consumed by core schema):
+      isq_het: [isq_het]
+      p_het: [p_het]
+    derive:
+      beta_from_or: false              # HERMES ships A1_beta directly (log OR scale)
+      # HERMES ships logP as unsigned -log10(P); the existing
+      # derive_pval_from_log10p path recovers pval, derive_log10p_columns
+      # produces the D026 underflow-safe columns.
+    metadata:
+      effect_scale: log_or
+      se_scale: log_or
+      build: GRCh37                    # pos_b37 column; liftover required for downstream merge with AF (b38)
+      ancestry: EUR                    # protocol decision: European HERMES is primary HF source
+
+  GIGASTROKE_GWAS_Catalog:
+    description: "GIGASTROKE 2022 / Mishra et al. Nature 2022 (PMID 36180795) — European ancestry harmonised summary statistics from GWAS Catalog. GCSTs: 90104539=AS, 90104540=AIS, 90104541=CES, 90104542=LAS, 90104543=SVS. Build = GRCh38 (harmonised), tabix-indexed. Harmonised SSF columns: chromosome / base_pair_location / effect_allele / other_allele / beta / standard_error / effect_allele_frequency / p_value / variant_id (often NA) / ci_upper / ci_lower / hm_coordinate_conversion / odds_ratio / hm_code / rsid."
+    column_aliases:
+      variant_id: [variant_id, hm_variant_id]
+      rsid: [rsid, hm_rsid, rs_id, dbsnp_id]
+      chr: [chromosome, chr, hm_chrom, "#chrom"]
+      pos: [base_pair_location, pos, hm_pos]
+      effect_allele: [effect_allele, hm_effect_allele, A1]
+      other_allele: [other_allele, hm_other_allele, A2]
+      beta: [beta, hm_beta]
+      or: [odds_ratio, hm_odds_ratio, OR]
+      se: [standard_error, hm_standard_error, se]
+      pval: [p_value, pval, P]
+      eaf: [effect_allele_frequency, hm_effect_allele_frequency, eaf]
+      n: [n_total, sample_size, N]
+      n_cases: [n_case, n_cases, ncase]
+      n_controls: [n_control, n_controls, ncontrol]
+      ci_lower: [ci_lower]
+      ci_upper: [ci_upper]
+      hm_coordinate_conversion: [hm_coordinate_conversion]
+      hm_code: [hm_code]
+    derive:
+      beta_from_or: false                 # GIGASTROKE harmonised ships beta directly
+    metadata:
+      effect_scale: log_or
+      se_scale: log_or
+      build: GRCh38                       # harmonised release on b38
+      ancestry: EUR
+
+  CVDKP_MEGASTROKE:
+    description: "MEGASTROKE 2018 EUR (Malik et al., Nat Genet 2018, PMID 29531354). Fwiths: MEGASTROKE.{1.AS,2.AIS,3.LAS,4.CES,5.SVS}.EUR.out(.gz). Build = GRCh37. Beta + SE + P columns. Header conventionally: MarkerName, Allele1, Allele2, Freq1, Effect, StdErr, P-value (METAL output). NOT primary per D029 — manual sensitivity only."
+    column_aliases:
+      variant_id: [MarkerName, SNP, ID, rsID]
+      rsid: [rsID, MarkerName, SNP, ID, rsid]
+      chr: [chr, CHR, chromosome, "#CHR"]
+      pos: [bp, BP, POS, base_pair_location, position, pos]
+      effect_allele: [Allele1, A1, EA, effect_allele, ALT]
+      other_allele: [Allele2, A2, NEA, other_allele, REF]
+      beta: [Effect, BETA, beta, log_or, b]
+      or: [OR, odds_ratio]
+      se: [StdErr, SE, standard_error, se]
+      pval: ["P-value", P, p_value, pval, pvalue, p]
+      log10p: ["-log10P", "-log10p", neg_log10p]
+      eaf: [Freq1, EAF, AF, frequency, MAF]
+      n: [N, sample_size, n_samples, TotalSampleSize]
+      n_cases: [N_case, N_cases, ncase]
+      n_controls: [N_control, N_controls, ncontrol]
+      info: [INFO, imputation_quality]
+    derive:
+      beta_from_or: false                  # Malik 2018 ships Effect (log OR) directly
+    metadata:
+      effect_scale: log_or
+      se_scale: log_or
+      build: GRCh37
+      ancestry: EUR
+
+  # ----------------------------- FinnGen -----------------------------------
+  FinnGen:
+    description: "FinnGen R12 / endpoint summary statistics. UKB-independent."
+    column_aliases:
+      variant_id: ["#chrom_pos_ref_alt", variant, variant_id, SNP]
+      rsid: [rsids, rsid, rsID, SNP]
+      chr: ["#chrom", chrom, chromosome, CHR]
+      pos: [pos, position, BP]
+      effect_allele: [alt, ALT, effect_allele, A1]
+      other_allele: [ref, REF, other_allele, A2]
+      beta: [beta, BETA, b]
+      or: [OR, odds_ratio]
+      se: [sebeta, SE, se]
+      pval: [pval, p, P]
+      eaf: [af_alt, AF_Allele2, EAF, MAF, AF]
+      n: [N, sample_size, n_samples]
+      n_cases: [n_case, n_cases, ncase]
+      n_controls: [n_control, n_controls, ncontrol]
+      info: [info, INFO]
+    derive:
+      beta_from_or: false        # FinnGen reports beta directly
+    metadata:
+      effect_scale: log_or
+      se_scale: log_or
+      build: GRCh38
+      ancestry: EUR
+
+  # --------------------------- GWAS Catalog --------------------------------
+  GWAS_Catalog:
+    description: "GWAS Catalog harmonized summary stats (variant_id-level)."
+    column_aliases:
+      variant_id: [variant_id, hm_variant_id, variant, ID]
+      rsid: [hm_rsid, rsid, hm_variant_id]
+      chr: [hm_chrom, chromosome, chr]
+      pos: [hm_pos, base_pair_location, position]
+      effect_allele: [hm_effect_allele, effect_allele]
+      other_allele: [hm_other_allele, other_allele]
+      beta: [hm_beta, beta]
+      or: [hm_odds_ratio, odds_ratio, OR]
+      se: [standard_error, se, hm_standard_error]
+      pval: [p_value, hm_p_value, pval, P]
+      eaf: [effect_allele_frequency, hm_effect_allele_frequency, eaf]
+      n: [n, sample_size, hm_sample_size, N]
+      n_cases: [n_cases, ncase, N_case]
+      n_controls: [n_controls, ncontrol, N_control]
+      info: [info, INFO]
+    derive:
+      beta_from_or: true         # many GWAS Catalog releases ship OR + SE_logOR
+    metadata:
+      effect_scale: log_or
+      se_scale: log_or
+      build: GRCh38
+      ancestry: MIXED
+
+  # ----------------------------- UKB-PPP -----------------------------------
+  UKBPPP:
+    description: "UK Biobank Pharma Proteomics Project Olink Explore 3072 cis-pQTL releases."
+    column_aliases:
+      variant_id: [VARIANT_ID, ID, MarkerName, SNP]
+      rsid: [rsID, rsid, ID]
+      chr: [CHROM, CHR, chrom, chr]
+      pos: [GENPOS, POS, position, BP]
+      effect_allele: [ALLELE1, A1, EA, effect_allele, ALT]
+      other_allele: [ALLELE0, A2, NEA, other_allele, REF]
+      beta: [BETA, beta, Effect]
+      or: []                     # UKB-PPP reports beta on the rank-INT scale
+      se: [SE, sebeta, standard_error]
+      pval: [P, pval, p_value]
+      log10p: [LOG10P, log10p]   # converted to pval downstream
+      eaf: [A1FREQ, EAF, frequency]
+      n: [N, sample_size]
+      n_cases: []                # quantitative
+      n_controls: []
+      info: [INFO, IMP_INFO]
+    derive:
+      beta_from_or: false
+      beta_from_log10p: true     # if log10p resolved, recover pval = 10**(-log10p)
+    metadata:
+      effect_scale: beta         # rank-INT normalised protein levels (continuous)
+      se_scale: log_or           # SE is on the same scale as BETA (continuous)
+      build: GRCh38
+      ancestry: EUR
+
+  # ------------------------------ deCODE -----------------------------------
+  deCODE:
+    description: "deCODE SomaScan v4 plasma pQTL releases (Ferkingstad 2021 + extensions)."
+    column_aliases:
+      variant_id: [Name, MarkerName, ID, SNP]
+      rsid: [rsID, rsid]
+      chr: [Chrom, CHR, chromosome, chr]
+      pos: [Pos, POS, position]
+      effect_allele: [effectAllele, EA, A1, effect_allele]
+      other_allele: [otherAllele, NEA, A2, other_allele]
+      beta: [Beta, beta, Effect, BETA]
+      or: []
+      se: [SE, sebeta, standard_error]
+      pval: [Pval, P, pval, p_value]
+      eaf: [ImpMAF, AF, EAF, MAF]
+      n: [N, sample_size]
+      info: [ImpInfo, INFO]
+    derive:
+      beta_from_or: false
+    metadata:
+      effect_scale: beta
+      se_scale: log_or
+      build: GRCh38
+      ancestry: EUR
+
+  # ------------------------------ GTEx -------------------------------------
+  GTEx:
+    description: "GTEx v8 cis-eQTL summary statistics (per tissue all_pairs files)."
+    column_aliases:
+      variant_id: [variant_id, SNP, ID]
+      rsid: [rs_id_dbSNP155_GRCh38p7, rs_id_dbSNP151_GRCh38p7, rsid]
+      chr: [chromosome, chr, CHR]
+      pos: [position, pos, BP]
+      effect_allele: [alt, ALT, effect_allele, A1]
+      other_allele: [ref, REF, other_allele, A2]
+      beta: [slope, beta, BETA]
+      or: []
+      se: [slope_se, se, SE, standard_error]
+      pval: [pval_nominal, pval, P, p_value]
+      eaf: [maf, MAF, AF, EAF]
+      n: [n_samples, ma_samples, sample_size, N]
+      info: []
+    derive:
+      beta_from_or: false
+      beta_from_z: false
+    metadata:
+      effect_scale: beta
+      se_scale: log_or
+      build: GRCh38
+      ancestry: MIXED
+
+  # ----------------------------- eQTLGen -----------------------------------
+  eQTLGen:
+    description: "eQTLGen Phase I cis-eQTL meta-analysis (whole blood, n=31,684). No native beta/SE on cis tables — Z/N/SNP-MAF supplied."
+    column_aliases:
+      variant_id: [SNP, ID]
+      rsid: [SNP, rsid]
+      chr: [SNPChr, CHR, chromosome]
+      pos: [SNPPos, BP, position]
+      effect_allele: [AssessedAllele, A1, EA, effect_allele]
+      other_allele: [OtherAllele, A2, NEA, other_allele]
+      beta: []                   # not provided directly
+      or: []
+      se: []                     # not provided directly
+      z: [Zscore, Z, zscore]
+      pval: [Pvalue, P, pval]
+      eaf: [AssessedAlleleFreq, AF, EAF, MAF]
+      n: [NrSamples, N, sample_size]
+      info: []
+    derive:
+      beta_from_or: false
+      beta_from_z: true          # use beta = z / sqrt(2 * MAF * (1-MAF) * (N + z^2)) and SE = 1 / sqrt(...)
+    metadata:
+      effect_scale: beta
+      se_scale: log_or
+      build: GRCh37              # eQTLGen Phase I is on hg19/GRCh37
+      ancestry: EUR

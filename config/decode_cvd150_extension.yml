@@ -1,0 +1,42 @@
+batch_name: CVD150 +100 extension (D036)
+scope_label: CVD-prioritized deCODE CVD150 target screen
+completed_subset_aptamers: 50
+n_new_aptamers: 100
+n_total_cvd150: 150
+n_unique_genes_extension: 100
+category_quotas:
+  cat2_coagulation: 18
+  cat4_lipid: 18
+  cat6_ecm_fibrosis: 18
+  cat7_endothelial_vascular: 18
+  cat3_inflammation: 18
+  cat5_cardiac_stress: 5
+  cat8_druggable_cvd: 5
+extension_category_counts:
+  cat2_coagulation: 18
+  cat3_inflammation: 18
+  cat4_lipid: 18
+  cat5_cardiac_stress: 5
+  cat6_ecm_fibrosis: 18
+  cat7_endothelial_vascular: 18
+  cat8_druggable_cvd: 5
+calibration_priors:
+  median_gb_per_aptamer: 0.953
+  median_minutes_per_aptamer_calib: 3.73
+  real_minutes_per_aptamer_4w_observed_CVD50: 3.4
+expected_metrics_4w_observed:
+  transfer_gb: 95.3
+  wall_hours: 5.67
+  empty_rate: 0.13
+  match_rate: 0.85
+list_qc_thresholds_d036:
+  n_new_aptamers_min: 90
+  n_new_aptamers_max: 110
+  n_total_min: 140
+  n_total_max: 160
+  transfer_gb_max: 120
+  runtime_4w_hours_max: 8
+  empty_rate_max: 0.3
+  match_rate_min: 0.75
+  top_gene_share_max: 0.05
+approval_gate: explicit_protocol_approval_required_before_extension_run
